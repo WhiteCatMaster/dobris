@@ -20,10 +20,34 @@
 
 #include "z_zone.h"
 #include "p_local.h"
-
+#include <stdio.h>
 #include "doomstat.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
 
+static int udp_sock = -1;
+static struct sockaddr_in udp_addr;
 
+static int debug_counter = 0;
+
+typedef struct
+{
+    int x;
+    int y;
+    int angle;
+    int health;
+} NetPlayerState;
+
+typedef struct
+{
+    int id;
+    int x;
+    int y;
+    int type;
+    int health;
+} NetEntityState;
 int	leveltime;
 
 //
@@ -124,30 +148,120 @@ void P_RunThinkers (void)
 
 void P_Ticker (void)
 {
-    int		i;
-    
+    int i;
+
     // run the tic
     if (paused)
-	return;
-		
-    // pause if in menu and at least one tic has been run
-    if ( !netgame
-	 && menuactive
-	 && !demoplayback
-	 && players[consoleplayer].viewz != 1)
-    {
-	return;
-    }
-    
-		
-    for (i=0 ; i<MAXPLAYERS ; i++)
-	if (playeringame[i])
-	    P_PlayerThink (&players[i]);
-			
-    P_RunThinkers ();
-    P_UpdateSpecials ();
-    P_RespawnSpecials ();
+        return;
 
-    // for par times
-    leveltime++;	
+    // pause if in menu and at least one tic has been run
+    if (!netgame
+        && menuactive
+        && !demoplayback
+        && players[consoleplayer].viewz != 1)
+    {
+        return;
+    }
+
+    // ---- LÓGICA ORIGINAL DEL JUEGO ----
+
+    for (i = 0; i < MAXPLAYERS; i++)
+        if (playeringame[i])
+            P_PlayerThink(&players[i]);
+
+    P_RunThinkers();
+    P_UpdateSpecials();
+    P_RespawnSpecials();
+
+    // ---- INICIALIZAR SOCKET UNA SOLA VEZ ----
+
+    if (udp_sock == -1)
+    {
+        udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
+
+        memset(&udp_addr, 0, sizeof(udp_addr));
+        udp_addr.sin_family = AF_INET;
+        udp_addr.sin_port = htons(5000);           // Puerto destino
+        udp_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Enviar a localhost
+    }
+
+    // ---- ENVIAR ESTADO 5 VECES POR SEGUNDO ----
+
+    static int send_counter = 0;
+    send_counter++;
+
+    if (send_counter % 7 == 0)   // 35 ticks / 7 ≈ 5 envíos por segundo
+    {
+        if (players[0].mo != NULL)
+        {
+            char buffer[2048];
+            int offset = 0;
+
+            thinker_t *th;
+
+            // --- PLAYER ---
+            int16_t px = players[0].mo->x >> 16;
+            int16_t py = players[0].mo->y >> 16;
+            int16_t hp = players[0].health;
+
+            memcpy(buffer + offset, &px, sizeof(int16_t)); offset += sizeof(int16_t);
+            memcpy(buffer + offset, &py, sizeof(int16_t)); offset += sizeof(int16_t);
+            memcpy(buffer + offset, &hp, sizeof(int16_t)); offset += sizeof(int16_t);
+
+            // --- ENTITY COUNT PLACEHOLDER ---
+            int16_t entity_count = 0;
+            int entity_count_offset = offset;
+            offset += sizeof(int16_t);
+
+            // --- ENTITIES ---
+            for (th = thinkercap.next; th != &thinkercap; th = th->next)
+            {
+                if (th->function.acp1 == (actionf_p1) P_MobjThinker)
+                {
+                    mobj_t *mo = (mobj_t *) th;
+
+                    if (mo == players[0].mo)
+                        continue;
+
+                    if (mo->health <= 0)
+                        continue;
+
+                    int dx = (mo->x - players[0].mo->x) >> 16;
+                    int dy = (mo->y - players[0].mo->y) >> 16;
+
+                    int dist = dx*dx + dy*dy;
+
+                    if (dist > 1500*1500)
+                        continue;
+
+                    int16_t ex = mo->x >> 16;
+                    int16_t ey = mo->y >> 16;
+                    int16_t type = mo->type;
+                    int16_t ehp = mo->health;
+
+                    memcpy(buffer + offset, &ex, sizeof(int16_t)); offset += sizeof(int16_t);
+                    memcpy(buffer + offset, &ey, sizeof(int16_t)); offset += sizeof(int16_t);
+                    memcpy(buffer + offset, &type, sizeof(int16_t)); offset += sizeof(int16_t);
+                    memcpy(buffer + offset, &ehp, sizeof(int16_t)); offset += sizeof(int16_t);
+
+                    entity_count++;
+                }
+            }
+
+            // Escribir entity_count en su sitio
+            memcpy(buffer + entity_count_offset, &entity_count, sizeof(int16_t));
+
+            // Enviar paquete
+            sendto(udp_sock,
+                   buffer,
+                   offset,
+                   0,
+                   (struct sockaddr*)&udp_addr,
+                   sizeof(udp_addr));
+        }
+    }
+
+    // ---- CONTADOR DE TIEMPO ----
+
+    leveltime++;
 }
