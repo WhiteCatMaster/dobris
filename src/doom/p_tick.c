@@ -27,6 +27,8 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+static uint16_t sat_sequence = 0;
+static int udp_initialized = 0;
 static int udp_sock = -1;
 static struct sockaddr_in udp_addr;
 
@@ -148,6 +150,17 @@ void P_RunThinkers (void)
 
 void P_Ticker (void)
 {
+if (!udp_initialized)
+{
+    udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
+
+    memset(&udp_addr, 0, sizeof(udp_addr));
+    udp_addr.sin_family = AF_INET;
+    udp_addr.sin_port = htons(5000);
+    udp_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    udp_initialized = 1;
+}
     int i;
 
     // run the tic
@@ -194,64 +207,22 @@ void P_Ticker (void)
     {
         if (players[0].mo != NULL)
         {
-            char buffer[2048];
+            uint8_t buffer[16];
             int offset = 0;
 
-            thinker_t *th;
+            sat_sequence++;
+            uint16_t seq_net = htons(sat_sequence);
+            memcpy(buffer + offset, &seq_net, 2);
+            offset += 2;
 
-            // --- PLAYER ---
-            int16_t px = players[0].mo->x >> 16;
-            int16_t py = players[0].mo->y >> 16;
-            int16_t hp = players[0].health;
+            int16_t px = htons(players[0].mo->x >> 16);
+            int16_t py = htons(players[0].mo->y >> 16);
+            int16_t hp = htons(players[0].health);
 
-            memcpy(buffer + offset, &px, sizeof(int16_t)); offset += sizeof(int16_t);
-            memcpy(buffer + offset, &py, sizeof(int16_t)); offset += sizeof(int16_t);
-            memcpy(buffer + offset, &hp, sizeof(int16_t)); offset += sizeof(int16_t);
+            memcpy(buffer + offset, &px, 2); offset += 2;
+            memcpy(buffer + offset, &py, 2); offset += 2;
+            memcpy(buffer + offset, &hp, 2); offset += 2;
 
-            // --- ENTITY COUNT PLACEHOLDER ---
-            int16_t entity_count = 0;
-            int entity_count_offset = offset;
-            offset += sizeof(int16_t);
-
-            // --- ENTITIES ---
-            for (th = thinkercap.next; th != &thinkercap; th = th->next)
-            {
-                if (th->function.acp1 == (actionf_p1) P_MobjThinker)
-                {
-                    mobj_t *mo = (mobj_t *) th;
-
-                    if (mo == players[0].mo)
-                        continue;
-
-                    if (mo->health <= 0)
-                        continue;
-
-                    int dx = (mo->x - players[0].mo->x) >> 16;
-                    int dy = (mo->y - players[0].mo->y) >> 16;
-
-                    int dist = dx*dx + dy*dy;
-
-                    if (dist > 1500*1500)
-                        continue;
-
-                    int16_t ex = mo->x >> 16;
-                    int16_t ey = mo->y >> 16;
-                    int16_t type = mo->type;
-                    int16_t ehp = mo->health;
-
-                    memcpy(buffer + offset, &ex, sizeof(int16_t)); offset += sizeof(int16_t);
-                    memcpy(buffer + offset, &ey, sizeof(int16_t)); offset += sizeof(int16_t);
-                    memcpy(buffer + offset, &type, sizeof(int16_t)); offset += sizeof(int16_t);
-                    memcpy(buffer + offset, &ehp, sizeof(int16_t)); offset += sizeof(int16_t);
-
-                    entity_count++;
-                }
-            }
-
-            // Escribir entity_count en su sitio
-            memcpy(buffer + entity_count_offset, &entity_count, sizeof(int16_t));
-
-            // Enviar paquete
             sendto(udp_sock,
                    buffer,
                    offset,
@@ -262,6 +233,5 @@ void P_Ticker (void)
     }
 
     // ---- CONTADOR DE TIEMPO ----
-
     leveltime++;
 }
