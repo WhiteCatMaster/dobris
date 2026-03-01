@@ -1,102 +1,100 @@
-# Chocolate Doom
+# dobris
 
-Chocolate Doom aims to accurately reproduce the original DOS version of
-Doom and other games based on the Doom engine in a form that can be
-run on modern computers.
+dobris is an open-source desktop application built with Electron, providing a centralized interface for launching and managing classic id Tech 1 engine games. It integrates with existing game engine ports like Chocolate Doom and offers configuration support for titles such as Hexen and Strife. The project also features C++ components for core logic and includes dedicated management for game-related music assets.
 
-Originally, Chocolate Doom was only a Doom source port. The project
-now includes ports of Heretic and Hexen, and Strife.
+## Features
 
-Chocolate Doom’s aims are:
+*   *Desktop Application*: Built using Electron for a cross-platform user interface, ensuring broad compatibility.
+*   *Game Launcher*: Provides a unified interface for discovering, launching, and managing classic game titles.
+*   *Chocolate Doom Integration*: Seamlessly works with the Chocolate Doom port of the original Doom engine.
+*   *Hexen & Strife Support*: Includes robust configuration and launch capabilities specifically for Hexen and Strife.
+*   *Music Management*: Features dedicated functionality for organizing and utilizing game music resources, enhancing the classic gaming experience.
+*   *C++ Core Components*: Utilizes C++ for robust backend functionalities and low-level game engine interactions, ensuring performance and precise control.
+*   *Continuous Integration*: Ensures code quality, consistency, and maintainability through automated workflows for C++ linting and checking.
+*   *Containerization Ready*: Supports development and deployment within Docker environments, facilitating consistent build and runtime conditions.
+*   *Contribution Guidelines*: Clear CONTRIBUTING.md and ISSUE_TEMPLATE.md are provided to guide community involvement.
 
- * To always be 100% Free and Open Source software.
- * Portability to as many different operating systems as possible.
- * Accurate reproduction of the original DOS versions of the games,
-   including bugs.
- * Compatibility with the DOS demo, configuration and savegame files.
- * To provide an accurate retro “feel” (display and input should
-   behave the same).
+## Tech Stack
 
-More information about the philosophy and design behind Chocolate Doom
-can be found in the PHILOSOPHY file distributed with the source code.
+dobris is developed using a combination of modern web technologies for its user interface and robust native languages for its core functionalities.
 
-## Setting up gameplay
+*   *Languages*: C++, HTML, CSS, JavaScript
+*   *Application Framework*: Electron
+*   *Build Systems*: CMake, Autotools (for C++ components)
+*   *Package Managers*: npm, Yarn
 
-For instructions on how to set up Chocolate Doom for play, see the
-INSTALL file.
+## Installation Guide
 
-## Configuration File
+To set up dobris for development or local usage, follow these steps.
 
-Chocolate Doom is compatible with the DOS Doom configuration file
-(normally named `default.cfg`). Existing configuration files for DOS
-Doom should therefore simply work out of the box. However, Chocolate
-Doom also provides some extra settings. These are stored in a
-separate file named `chocolate-doom.cfg`.
+### Prerequisites
 
-The configuration can be edited using the chocolate-setup tool.
+Ensure you have the following installed on your system:
 
-## Command line options
+*   *Node.js*: The latest LTS version is recommended (includes npm).
+*   *Yarn* (Optional, if preferred over npm): Install globally via npm install -g yarn.
+*   *C++ Development Environment*:
+    *   A C++ compiler (e.g., GCC, Clang, MSVC).
+    *   CMake for building C++ components.
+    *   Autotools (autoconf, automake, libtool) for certain build scripts.
 
-Chocolate Doom supports a number of command line parameters, including
-some extras that were not originally suported by the DOS versions. For
-binary distributions, see the CMDLINE file included with your
-download; more information is also available on the Chocolate Doom
-website.
+### Steps
 
-## Playing TCs
+1.  *Clone the Repository*:
+    bash
+    git clone https://github.com/dobris-org/dobris.git
+    cd dobris
+    
+    (Note: Replace https://github.com/dobris-org/dobris.git with the actual repository URL)
 
-With Vanilla Doom there is no way to include sprites in PWAD files.
-Chocolate Doom’s ‘-file’ command line option behaves exactly the same
-as Vanilla Doom, and trying to play TCs by adding the WAD files using
-‘-file’ will not work.
+2.  *Install Node.js Dependencies*:
+    Using npm:
+    bash
+    npm install
+    
+    Or using Yarn:
+    bash
+    yarn install
+    
 
-Many Total Conversions (TCs) are distributed as a PWAD file which must
-be merged into the main IWAD. Typically a copy of DEUSF.EXE is
-included which performs this merge. Chocolate Doom includes a new
-option, ‘-merge’, which will simulate this merge. Essentially, the
-WAD directory is merged in memory, removing the need to modify the
-IWAD on disk.
+3.  *Run the Application*:
+    To start the application in development mode:
+    Using npm:
+    bash
+    npm start
+    
+    Or using Yarn:
+    bash
+    yarn start
+    
 
-To play TCs using Chocolate Doom, run like this:
+4.  *Build for Production (Optional)*:
+    To build the application for distribution:
+    Using npm:
+    bash
+    npm run dist
+    
+    Or using Yarn:
+    bash
+    yarn dist
+    
+    This command will package the application for your operating system, typically placing the output in a dist/ directory.
 
-```
-chocolate-doom -merge thetc.wad
-```
+## Usage Instructions
 
-Here are some examples:
+Upon launching dobris, you will be presented with an intuitive interface designed to manage your classic game library.
 
-```
-chocolate-doom -merge batman.wad -deh batman.deh vbatman.deh  (Batman Doom)
-chocolate-doom -merge aoddoom1.wad -deh aoddoom1.deh  (Army of Darkness Doom)
-```
+1.  *Game Discovery*: The application will guide you through locating your installed game files and WADs for titles such as Doom, Hexen, and Strife.
+2.  *Configuration*: Navigate through the application to set up game paths, modify specific engine parameters for supported games, and customize launch options.
+3.  *Launch Games*: Easily launch your configured games directly from the dobris interface.
+4.  *Music Management*: Utilize the dedicated section for organizing and previewing game music files, which can then be associated with specific game launches.
 
-## Other information
+Refer to the in-application interface for detailed instructions on specific features and settings.
 
- * Chocolate Doom includes a number of different options for music
-   playback. See the README.Music file for more details.
+## Contributing
 
- * More information, including information about how to play various
-   classic TCs, is available on the Chocolate Doom website:
+We warmly welcome contributions from the community to enhance dobris. Whether you're reporting a bug, suggesting a new feature, or submitting code, your input is valuable.
 
-     https://www.chocolate-doom.org/
-
-   You are encouraged to sign up and contribute any useful information
-   you may have regarding the port!
-
- * Chocolate Doom is not perfect. Although it aims to accurately
-   emulate and reproduce the DOS executables, some behavior can be very
-   difficult to reproduce. Because of the nature of the project, you
-   may also encounter Vanilla Doom bugs; these are intentionally
-   present; see the NOT-BUGS file for more information.
-
-   New bug reports, feedback, questions or suggestions can be submitted
-   to the issue tracker on Github:
-
-     https://github.com/chocolate-doom/chocolate-doom/issues
-
- * Source code patches are welcome, but please follow the style
-   guidelines - see the file named HACKING included with the source
-   distribution.
-
- * Chocolate Doom is distributed under the GNU GPL. See the COPYING
-   file for more information.
+*   Please refer to our comprehensive [CONTRIBUTING.md](CONTRIBUTING.md) guide for detailed information on how to get involved, set up your development environment, and adhere to our contribution workflow.
+*   When reporting issues, please use the provided [ISSUE_TEMPLATE.md](.github/ISSUE_TEMPLATE.md) to ensure all necessary information is included.
+*   All C++ code contributions are subject to automated linting and checking via our Continuous Integration pipelines to maintain high code quality and consistency.
