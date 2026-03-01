@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Launcher de Doom</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <br>
+  <img class="logo" src="Doomlauncher.png">
+  <br><br>
+  <div class="CENTRADO">
+    <label>Sistema Operativo:</label><br>
+    <div class="opciones-os">
+      <input type="radio" id="win" name="os" value="windows" checked onclick="document.getElementById('caja-carpeta').style.display='block'">
+      <label for="win" style="margin-right: 15px;">Windows</label>
+      
+      <input type="radio" id="lin" name="os" value="linux" onclick="document.getElementById('caja-carpeta').style.display='none'">
+      <label for="lin">Linux</label>
+    </div>
+
+    <div id="caja-carpeta">
+      <label>Carpeta del juego:</label>
+      <input type="text" id="carpeta" placeholder="downloads\chocolate-doom-3.1.1-win64">
+    </div>
+
+    <label>Nombre del archivo WAD:</label>
+    <input type="text" id="wad" placeholder="freedoom1.wad">
+
+    <label>IP del Servidor:</label>
+    <input type="text" id="ip" placeholder="10.20.26.12">
+
+    <button id="btnLanzar">EJECUTAR DOOM!</button>
+  </div>
+
+  <script>
+    document.getElementById('btnLanzar').addEventListener('click', () => {
+      const carpeta = document.getElementById('carpeta').value;
+      const wad = document.getElementById('wad').value;
+      const ip = document.getElementById('ip').value;
+      const puerto = 5029;
+      
+      const sistemaElegido = document.querySelector('input[name="os"]:checked').value;
+      window.api.lanzar(carpeta, wad, ip, puerto, sistemaElegido);
+    });
+  </script>
+</body>
+</html>

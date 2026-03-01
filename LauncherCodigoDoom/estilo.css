@@ -1,0 +1,48 @@
+.logo {
+    width: 90%;
+    display: block;
+    margin: 0 auto;  
+}
+
+body {
+    margin: 0;
+    background-color: #2B2B2B;
+    color: white;
+  }
+
+input[type="text"] { 
+    width: 95%; 
+    margin-bottom: 15px; 
+    padding: 8px; 
+    font-size: 14px; 
+}
+
+input[type="radio"] { 
+    width: auto; 
+    margin-right: 5px; 
+} 
+
+.opciones-os { 
+    margin-bottom: 15px; 
+}
+
+button { 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    background: #d9534f; 
+    color: white; 
+    border: none; 
+    font-weight: bold; 
+    width: 100%; 
+    font-size: 16px; 
+}
+
+button:hover { 
+    background: #c9302c; 
+}
+
+.CENTRADO {
+    width: 90%;
+    display: block;
+    margin: 0 auto;
+}

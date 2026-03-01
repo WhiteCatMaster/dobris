@@ -1,0 +1,28 @@
+{
+  "name": "doom",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "doom.launcher",
+    "productName": "Launcher de DOOM",
+    "win": {
+      "target": "nsis",
+      "icon": "DoomlauncherFav.png"
+    },
+    "linux": {
+      "target": "tar.gz",
+      "icon": "DoomlauncherFav.png"
+    },
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
+  "devDependencies": {
+    "electron": "^40.6.1",
+    "electron-builder": "^24.0.0"
+  }
+}
